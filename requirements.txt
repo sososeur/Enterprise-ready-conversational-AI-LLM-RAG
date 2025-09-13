@@ -1,0 +1,21 @@
+# Core LangChain & AI
+langchain
+langchain-openai
+sentence-transformers
+huggingface-hub
+
+# Vector Store
+chromadb
+
+# Document Loaders
+pypdf
+unstructured
+
+# Backend API
+fastapi
+uvicorn[standard]
+pydantic
+
+# Frontend
+streamlit
+requests

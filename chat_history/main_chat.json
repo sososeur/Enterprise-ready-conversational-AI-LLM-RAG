@@ -1,0 +1,38 @@
+[
+  {
+    "role": "user",
+    "content": "what is the primary skills that is mentioned in the Job description?"
+  },
+  {
+    "role": "assistant",
+    "content": "I could not find an answer to that in the provided documents.",
+    "sources": []
+  },
+  {
+    "role": "user",
+    "content": "what is the primary skills that is mentioned in the meetmux Job description?"
+  },
+  {
+    "role": "assistant",
+    "content": "The primary skills mentioned in the Meetup job description for a Product Developer Intern are:\n\n1. Swift, SwiftUI, Xcode\n2. REST APIs, JSON handling\n3. Git version control\n\nAdditionally, other preferred skills include React/React Native, Node.js, PHP Laravel, SQL, API design & integration, and strong UI/UX understanding.",
+    "sources": []
+  },
+  {
+    "role": "user",
+    "content": "What are the different roles availabe in the meetmux Job description. Kindly explain"
+  },
+  {
+    "role": "assistant",
+    "content": "MeetMux offers digital and offline marketing campaigns, campaign planning & execution, and data analytics tools.",
+    "sources": []
+  },
+  {
+    "role": "user",
+    "content": "Highlight each and every roles availabel in meetmux JD"
+  },
+  {
+    "role": "assistant",
+    "content": "The three different roles mentioned in the MeetMux job description are digital and offline marketing, campaign planning and execution, and data analytics.",
+    "sources": []
+  }
+]
