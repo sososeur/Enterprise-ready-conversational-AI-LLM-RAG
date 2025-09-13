@@ -76,7 +76,7 @@ LLM_development/
 │
 ├── vector_db/              # (Auto-generated) ChromaDB storage
 │
-├── chat_history/           # (Auto-generated) Saved JSON chat logs
+├── chat_history/           # Contains chat histories of the model's responses.
 │
 ├── requirements.txt        # Python dependencies
 └── run.sh                  # Script to start the application
