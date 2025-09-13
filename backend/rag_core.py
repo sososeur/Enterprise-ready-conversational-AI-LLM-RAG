@@ -15,6 +15,8 @@ from langchain.prompts import PromptTemplate
 from langchain_core.runnables import RunnableLambda, RunnablePassthrough
 from langchain_core.output_parsers import StrOutputParser
 from langchain.schema import Document
+import numpy as np
+import re
 import logging
 
 logging.basicConfig(level=logging.INFO)
@@ -30,41 +32,35 @@ CONDENSE_QUESTION_PROMPT = PromptTemplate.from_template(
     Standalone question:"""
 )
 
+# --- REFINEMENT 1: A new, balanced prompt encouraging helpful explanations ---
 ANSWER_PROMPT = PromptTemplate.from_template(
-    """You are a highly skilled AI assistant designed for concise and accurate answers.
+    """You are a helpful and expert AI assistant. Your task is to provide a clear, well-structured, and explanatory answer to the user's question using ONLY the provided document context.
 
-    **CRITICAL INSTRUCTIONS:**
-    1.  Your primary goal is to answer the user's 'Standalone Question' directly and concisely.
-    2.  Use the provided 'Document Context' as your ONLY source of truth.
-    3.  **DO NOT** repeat information. Synthesize the key points into a brief, focused answer. Avoid verbose explanations.
-    4.  If the context does not contain the answer, you MUST reply with ONLY this exact phrase: "I could not find an answer to that in the provided documents."
-    5.  Focus exclusively on the information needed to answer the 'Standalone Question'. Ignore any irrelevant details in the context.
+    **Core Instructions:**
+    1.  Analyze the 'Standalone Question' and the 'Document Context' to form your answer.
+    2.  Your answer MUST be a helpful explanation that directly addresses the user's question.
+    3.  Structure your answer logically. Use paragraphs to separate distinct ideas.
+    4.  Be thorough in your explanation, but do not add information that isn't in the context and avoid unnecessary repetition.
+    5.  If the context does not contain the information to answer the question, you MUST reply with ONLY this exact phrase: "I could not find an answer to that in the provided documents."
 
     **Document Context:**
     {context}
 
     **Standalone Question:** {question}
 
-    **Concise Answer:**"""
+    **Helpful Answer:**"""
 )
-
-def _format_chat_history(chat_history: List[Tuple[str, str]]) -> str:
-    buffer = []
-    for human, ai in chat_history:
-        buffer.append(f"Human: {human}\nAI: {ai}")
-    return "\n".join(buffer)
 
 def _format_docs(docs: List[Document]) -> str:
     return "\n\n".join(doc.page_content for doc in docs)
 
 class ConversationalRAG:
     def __init__(self):
+        # --- REFINEMENT 2: Slightly increasing temperature for more natural generation ---
         self.llm = ChatOpenAI(
             base_url="http://localhost:1234/v1",
             api_key="not-needed",
-            temperature=0.5
-            
-        
+            temperature=0.6 # Increased from 0.5 to encourage more explanatory text
         )
         self.embeddings = HuggingFaceEmbeddings(model_name="sentence-transformers/all-MiniLM-L6-v2")
         self.db_directory = "./vector_db"
@@ -75,64 +71,64 @@ class ConversationalRAG:
         self.metadata_file = os.path.join(self.db_directory, "processed_files.json")
         self.processed_files = self._load_processed_files_metadata()
 
+    def _is_follow_up(self, question: str, chat_history: List[Dict]) -> Tuple[bool, List[Tuple[str, str]]]:
+        if not chat_history:
+            return False, []
+        pronoun_pattern = r"\b(it|that|this|those|these|they|them|he|him|she|her)\b"
+        if re.search(pronoun_pattern, question.lower()) or len(question.split()) <= 3:
+            last_exchange = chat_history[-3:]
+            user_msg = last_exchange[0]['content']
+            ai_msg = last_exchange[1]['content']
+            return True, [(user_msg, ai_msg)]
+        question_embedding = self.embeddings.embed_query(question)
+        history_embeddings = self.embeddings.embed_documents([turn['content'] for turn in chat_history if turn['role'] == 'user'])
+        similarities = [np.dot(question_embedding, hist_emb) / (np.linalg.norm(question_embedding) * np.linalg.norm(hist_emb)) for hist_emb in history_embeddings]
+        max_similarity = max(similarities) if similarities else 0
+        logger.info(f"Max similarity score with history: {max_similarity:.4f}")
+        if max_similarity > 0.7:
+            most_relevant_index = np.argmax(similarities)
+            user_turn_index = most_relevant_index * 2
+            if user_turn_index + 1 < len(chat_history):
+                user_msg = chat_history[user_turn_index]['content']
+                ai_msg = chat_history[user_turn_index + 1]['content']
+                return True, [(user_msg, ai_msg)]
+        return False, []
+
     def initialize_chain(self):
         try:
             if self.chroma_client.get_collection(name="langchain").count() == 0:
                 self.rag_initialized = False; return
         except Exception:
             self.rag_initialized = False; return
-            
-        logger.info("Initializing stateless Conversational RAG chain...")
-        
+        logger.info("Initializing custom Conversational RAG chain...")
         retriever = self.vectorstore.as_retriever(search_type="mmr", search_kwargs={"k": 5, "fetch_k": 20})
-
-        # --- REFINEMENT 1: Removed the stateful ConversationBufferWindowMemory ---
-        # The chain is now fully stateless and relies on the history passed in each call.
-
-        inputs = RunnablePassthrough()
-        
-        condense_question_chain = (
-            {"question": lambda x: x["question"], "chat_history": lambda x: _format_chat_history(x["chat_history"])}
-            | CONDENSE_QUESTION_PROMPT | self.llm | StrOutputParser()
-        )
-
-        answer_chain = (
-            {"context": retriever | _format_docs, "question": RunnablePassthrough(), "chat_history": RunnableLambda(lambda x: "")}
+        self.answer_chain = (
+            {"context": retriever | _format_docs, "question": RunnablePassthrough()}
             | ANSWER_PROMPT | self.llm | StrOutputParser()
         )
-
-        self.rag_chain = condense_question_chain | answer_chain
-        
         self.rag_initialized = True
-        logger.info("Stateless RAG chain is ready.")
+        logger.info("RAG chain components are ready.")
 
     def query(self, question: str, chat_history: List[Dict]) -> Dict:
-        if not self.rag_initialized or not self.rag_chain:
+        if not self.rag_initialized:
             logger.info("RAG not initialized. Responding with general knowledge.")
             response = self.llm.invoke(question)
             return {"answer": response.content.strip(), "sources": [], "type": "general"}
-
-        logger.info("RAG is initialized. Routing to custom RAG chain.")
-        
-        # --- REFINEMENT 2: Simplified and more robust history formatting ---
-        # Assumes history is always [user, assistant, user, assistant, ...]
-        formatted_history_tuples = []
-        for i in range(0, len(chat_history), 2):
-            if i + 1 < len(chat_history):
-                user_msg = chat_history[i]['content']
-                ai_msg = chat_history[i+1]['content']
-                formatted_history_tuples.append((user_msg, ai_msg))
-        # --- End of Refinement ---
-
-        response = self.rag_chain.invoke({
-            "question": question,
-            "chat_history": formatted_history_tuples
-        })
-        
+        is_follow_up, selected_history = self._is_follow_up(question, chat_history)
+        final_question = question
+        if is_follow_up:
+            logger.info("Follow-up detected. Condensing question with selected history.")
+            history_str = "\n".join([f"Human: {h}\nAI: {a}" for h, a in selected_history])
+            final_question = (
+                CONDENSE_QUESTION_PROMPT | self.llm | StrOutputParser()
+            ).invoke({"chat_history": history_str, "question": question})
+            logger.info(f"Standalone question: {final_question}")
+        else:
+            logger.info("No follow-up detected. Using original question.")
+        response = self.answer_chain.invoke(final_question)
         return {"answer": response.strip(), "sources": [], "type": "rag"}
-
+        
     # --- No changes to the functions below this line ---
-
     def load_and_process_documents(self, directory="knowledge_base") -> int:
         logger.info(f"Scanning for documents in directory: '{os.path.abspath(directory)}'")
         if not os.path.exists(directory): return 0
@@ -179,4 +175,3 @@ class ConversationalRAG:
 
     def _get_file_hash(self, file_path: str) -> str:
         with open(file_path, 'rb') as f: return hashlib.md5(f.read()).hexdigest()
-
