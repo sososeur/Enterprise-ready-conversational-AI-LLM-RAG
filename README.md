@@ -29,7 +29,7 @@ This prototype successfully implements several advanced features crucial for a t
 
 | Component             | Technology                                   | Role                                                                    |
 | --------------------- | -------------------------------------------- | ----------------------------------------------------------------------- |
-| **Language Model**    | **Llama 3 8B Instruct (via LM Studio)**      | The core reasoning engine for understanding and generating language.      |
+| **Language Model**    | **Llama 3.2B Instruct (via LM Studio)**      | The core reasoning engine for understanding and generating language.      |
 | **AI Orchestration**  | **LangChain**                                | The framework for orchestrating the RAG pipeline and its components.    |
 | **Vector Database**   | **ChromaDB**                                 | Stores document embeddings for efficient semantic search.                 |
 | **Embedding Model**   | **`all-MiniLM-L6-v2`**                       | Converts text into meaningful numerical vectors (embeddings).           |
@@ -89,7 +89,7 @@ LLM_development/
 -   [LM Studio](https://lmstudio.ai/) installed.
 
 **Step 1: Download the LLM in LM Studio**
-1.  Open LM Studio, search for, and download a **Llama 3 8B Instruct GGUF** model.
+1.  Open LM Studio, search for, and download a **Llama 3.2B Instruct GGUF** model.
 2.  Navigate to the "Local Server" tab (`<- ->` icon).
 3.  Select your downloaded model and click **"Start Server"**.
 
