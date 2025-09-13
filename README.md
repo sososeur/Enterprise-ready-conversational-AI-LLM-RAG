@@ -1,3 +1,3 @@
 ## RAG+LLM powered chatbot assistance for employees.
 
-Prototyped an AI chatbot powered by large language model--llama 3.2B instruct and Retrieval augemented generation for including the document information in generating the response from the llm.
+Prototyped an AI chatbot powered by large language model--llama 3.2B instruct and Retrieval augemented generation for including the document information in generating the response from the llm. Orchestrated this whole mechanism using langchain and the model management in LMStudio locally. To top of this, python web framework streamlit has been employed for an interactive web application, where employees can ask questions about the specifc modules directly via the application. To facilitate the interaction between frontend and backend, FASTAPI has been used.
