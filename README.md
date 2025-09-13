@@ -2,7 +2,7 @@
 
 This repository contains the prototype for a secure, on-premise conversational AI assistant, designed to address the operational challenge of internal information retrieval. The system enables employees to query enterprise documentation via a natural language interface.
 
-This project implements a custom, multi-step **Retrieval-Augmented Generation (RAG)** pipeline, orchestrated with LangChain, to ground a locally-hosted Llama 3 8B Instruct model in a private knowledge base. The system is built on a decoupled three-tier architecture, proving the viability of leveraging local LLMs to transform static documents into an interactive, on-demand knowledge resource and enhance operational efficiency.
+This project implements a custom, multi-step **Retrieval-Augmented Generation (RAG)** pipeline, orchestrated with LangChain, to ground a locally-hosted Llama 3.2B Instruct model in a private knowledge base. The system is built on a decoupled three-tier architecture, proving the viability of leveraging local LLMs to transform static documents into an interactive, on-demand knowledge resource and enhance operational efficiency.
 
 ## Table of Contents
 
